@@ -1,15 +1,15 @@
-import urllib3
-import re
-import string
-import json
-import html
-import config
 from bs4 import BeautifulSoup
 from bs4.element import Comment
 from urllib3.exceptions import HTTPError
 from io import StringIO
 from nltk.stem import PorterStemmer
 import os.path as path
+import urllib3
+import re
+import string
+import json
+import html
+import config
 
 
 class SoupStrainer():
@@ -40,10 +40,7 @@ class SoupStrainer():
         htmatch = re.compile('.*http.*')
         user_agent = {
             'user-agent': 'Mozilla/5.0 (Windows NT 6.3;rv:36.0) Gecko/20100101 Firefox/36.0'}
-        ps = PorterStemmer()
-        if(htmatch.match(self.locToGet) is None):
-            self.locToGet = 'http://' + self.locToGet
-
+       
         if len(self.locToGet) > 5:
             try:
                 urllib3.disable_warnings(
@@ -52,7 +49,6 @@ class SoupStrainer():
                 r = http.request('GET', self.locToGet)
                 self.pageData = r.data
             except:
-                self.errMsg = 'Error on HTTP request'
                 return False
 
         self.extractText = ''
@@ -61,7 +57,14 @@ class SoupStrainer():
         ttexts = self.soup.findAll(text=True)
         viz_text = filter(self.tag_visible, ttexts)
         allVisText = u"".join(t.strip() for t in viz_text)
-        for word in allVisText.split():
+        getStemmedWords(allVisText.split())
+
+        return True
+
+
+    def getStemmedWords(self, text):
+        ps = PorterStemmer()
+        for word in text:
             canonWord = word.lower()
             canonWord = canonWord.translate(
                 str.maketrans('', '', string.punctuation))
@@ -69,5 +72,3 @@ class SoupStrainer():
             if(canonWord in self.englishDictionary):
                 canonWord = ps.stem(canonWord)
                 self.extractText = self.extractText + canonWord + " "
-
-        return True

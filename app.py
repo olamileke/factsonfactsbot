@@ -1,3 +1,4 @@
+from telegram import ChatAction
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 from filters import UrlFilter
 from scraper import SoupStrainer
@@ -8,7 +9,7 @@ import pickle
 import os.path as path
 import logging
 
-# Enable logging of errors
+# Enable logging of errors  
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -27,36 +28,77 @@ def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 
-def check_url(update, context):
+def predict_url(update, context):
     chat_id = update.effective_chat.id
+    context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     ss = SoupStrainer()
     ss.init()
     if ss.loadAddress(update.message.text):
         article = buildRow(ss.extractText)
         article = article.reshape(1, -1)
-        svc_prediction = svc_model.predict(article)
-        svc_probabilities = svc_model.predict_proba(article)
-
-        print('*** SVC ')
-        print('Prediction on this article is: ')
-        print(svc_prediction)
-        print('Probabilities:')
-        print(svc_probabilities)
+        prediction = svc_model.predict(article)
+        probabilities = svc_model.predict_proba(article)
+        print(probabilities)
+        context.bot.send_message(chat_id=chat_id, text=getPredictionsText(
+            prediction, probabilities[0]), reply_to_message_id=update.message.message_id)
     else:
         context.bot.send_message(
-            chat_id=chat_id, text='There was a problem loading page data.')
+            chat_id=chat_id, text='I am sorry. I could not load page data for ' + update.message.text)
 
-    context.bot.send_message(chat_id=chat_id, text='Yeeah')
 
+def predict_text(update, context):
+    words = update.message.text.split()
+    num_words = len(words)
+    chat_id = update.effective_chat.id
+
+    if num_words < 500:
+        context.bot.send_message(chat_id=chat_id, text=str(num_words) + ' counted. I need text containing at least 500 words',
+                                 reply_to_message_id=update.message.message_id)
+        print(num_words)
+        return
+
+    ss = SoupStrainer()
+    ss.init()
+    ss.extractText = ''
+    ss.getStemmedWords(words)
+    article = buildRow(ss.extractText)
+    article = article.reshape(1, -1)
+    prediction = svc_model.predict(article)
+    probabilities = svc_model.predict_proba(article)
+    print(probabilities)
+    context.bot.send_message(chat_id=chat_id, text=getPredictionsText(
+        prediction, probabilities[0]), reply_to_message_id=update.message.message_id)
+
+
+def getPredictionsText(prediction, probabilities):
+    if prediction == 1:
+        return 'This article is false.'
+    elif prediction == 2:
+        return 'Although this article contains certain elements of truth. It is mostly false.'
+    elif prediction == 3:
+        if (probabilities[2] + probabilities[3]) > 0.8:
+            return 'This article is true'
+        else:
+            return 'While mostly true, this article contains a few mischarecterizations and untruths'
+    else:
+        return 'This article is true.'
+
+
+def unknown(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm sorry. I do not understand that.")
 
 
 # Creating the command/message handlers
 start_handler = CommandHandler('start', start)
-url_handler = MessageHandler(url_filter, check_url)
+url_handler = MessageHandler(url_filter, predict_url)
+text_handler = MessageHandler(Filters.text, predict_text)
+unknown_handler = MessageHandler(Filters.all, unknown)
 
 # Adding the handlers to the dispatcher
 dispatcher.add_handler(start_handler)
 dispatcher.add_handler(url_handler)
+dispatcher.add_handler(text_handler)
+dispatcher.add_handler(unknown_handler)
 
 
 # Starting the bot

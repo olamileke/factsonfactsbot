@@ -16,8 +16,5 @@ def buildRow(body_text):
     for word in cwords:
         if(word in cDict.keys()):
             one_ex_vector[cDict[word] - 1] = 1
-            print('X')
-        else:
-            print("This word doesn't exist in the dict" + word)
 
     return(one_ex_vector)

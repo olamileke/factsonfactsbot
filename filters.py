@@ -7,6 +7,9 @@ class UrlFilter(BaseFilter):
     def filter(self, message):
         url_match = re.compile('.*http.*')
 
+        if message.text is None:
+        	return False
+
         if url_match.match(message.text) is None:
             return False
 
