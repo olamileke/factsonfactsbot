@@ -57,7 +57,7 @@ class SoupStrainer():
         ttexts = self.soup.findAll(text=True)
         viz_text = filter(self.tag_visible, ttexts)
         allVisText = u"".join(t.strip() for t in viz_text)
-        getStemmedWords(allVisText.split())
+        self.getStemmedWords(allVisText.split())
 
         return True
 

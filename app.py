@@ -9,7 +9,7 @@ import pickle
 import os.path as path
 import logging
 
-# Enable logging of errors  
+# Enable logging of errors
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
@@ -28,17 +28,18 @@ def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=text)
 
 
-def predict_url(update, context):
+def predict_url(update, context, text=None):
+    if text is None:
+        text = update.message.text
+
     chat_id = update.effective_chat.id
     context.bot.send_chat_action(chat_id=chat_id, action=ChatAction.TYPING)
     ss = SoupStrainer()
     ss.init()
-    if ss.loadAddress(update.message.text):
-        article = buildRow(ss.extractText)
-        article = article.reshape(1, -1)
-        prediction = svc_model.predict(article)
-        probabilities = svc_model.predict_proba(article)
+    if ss.loadAddress(text):
+        (article, prediction, probabilities) = make_prediction(ss.extractText)
         print(probabilities)
+        print(prediction)
         context.bot.send_message(chat_id=chat_id, text=getPredictionsText(
             prediction, probabilities[0]), reply_to_message_id=update.message.message_id)
     else:
@@ -46,8 +47,18 @@ def predict_url(update, context):
             chat_id=chat_id, text='I am sorry. I could not load page data for ' + update.message.text)
 
 
-def predict_text(update, context):
-    words = update.message.text.split()
+def make_prediction(text):
+    article = buildRow(text)
+    article = article.reshape(1, -1)
+    prediction = svc_model.predict(article)
+    probabilities = svc_model.predict_proba(article)
+
+    return (article, prediction, probabilities)
+
+
+def predict_text(update, context, words=None):
+    if words is None:
+        words = update.message.text.split()
     num_words = len(words)
     chat_id = update.effective_chat.id
 
@@ -61,10 +72,7 @@ def predict_text(update, context):
     ss.init()
     ss.extractText = ''
     ss.getStemmedWords(words)
-    article = buildRow(ss.extractText)
-    article = article.reshape(1, -1)
-    prediction = svc_model.predict(article)
-    probabilities = svc_model.predict_proba(article)
+    (article, prediction, probabilities) = make_prediction(ss.extractText)
     print(probabilities)
     context.bot.send_message(chat_id=chat_id, text=getPredictionsText(
         prediction, probabilities[0]), reply_to_message_id=update.message.message_id)
@@ -84,18 +92,39 @@ def getPredictionsText(prediction, probabilities):
         return 'This article is true.'
 
 
+def group(update, context):
+    url_match = re.compile('.*http.*')
+    text = update.message.text
+
+    if text is None:
+        return
+
+    if url_match.match(text):
+        predict_url(update, context, text)
+        return
+
+    words = text.split()
+    num_words = len(words)
+
+    if num_words >= 500:
+        predict_text(update, context, words)
+
+
 def unknown(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm sorry. I do not understand that.")
+    context.bot.send_message(
+        chat_id=update.effective_chat.id, text="I'm sorry. I do not understand that.")
 
 
 # Creating the command/message handlers
 start_handler = CommandHandler('start', start)
+group_handler = MessageHandler(Filters.group, group)
 url_handler = MessageHandler(url_filter, predict_url)
 text_handler = MessageHandler(Filters.text, predict_text)
 unknown_handler = MessageHandler(Filters.all, unknown)
 
 # Adding the handlers to the dispatcher
 dispatcher.add_handler(start_handler)
+dispatcher.add_handler(group_handler)
 dispatcher.add_handler(url_handler)
 dispatcher.add_handler(text_handler)
 dispatcher.add_handler(unknown_handler)
