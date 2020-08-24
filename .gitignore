@@ -4,3 +4,6 @@ venv
 
 # Pycache folder
 __pycache__
+
+# Configuration
+config.py

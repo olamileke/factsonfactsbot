@@ -26,7 +26,6 @@ class SoupStrainer():
         with open(path.join(config.base_dir, 'words.json')) as reader:
             self.englishDictionary = json.load(reader)
 
-
     def tag_visible(self, element):
         if element.parent.name in ['style', 'script', 'head', 'title', 'meta', '[document]']:
             return False
@@ -40,7 +39,7 @@ class SoupStrainer():
         htmatch = re.compile('.*http.*')
         user_agent = {
             'user-agent': 'Mozilla/5.0 (Windows NT 6.3;rv:36.0) Gecko/20100101 Firefox/36.0'}
-       
+
         if len(self.locToGet) > 5:
             try:
                 urllib3.disable_warnings(
@@ -60,7 +59,6 @@ class SoupStrainer():
         self.getStemmedWords(allVisText.split())
 
         return True
-
 
     def getStemmedWords(self, text):
         ps = PorterStemmer()
