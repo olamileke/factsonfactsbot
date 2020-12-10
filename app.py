@@ -108,12 +108,11 @@ def predict_text(update, context, words=None):
 
     context.bot.send_message(chat_id=chat_id, text=text, reply_to_message_id=update.message.message_id)
 
-
 def getPredictionsText(prediction, probabilities):
     if prediction == 1:
-        return 'This is false.'
+        return 'This is fake.'
     elif prediction == 2:
-        return 'Although this contains certain elements of truth. It is mostly false.'
+        return 'Although this contains certain elements of truth. It is mostly fake.'
     elif prediction == 3:
         if (probabilities[2] + probabilities[3]) > 0.8:
             return 'This article is true'
