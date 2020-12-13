@@ -84,10 +84,7 @@ def getPredictionsText(prediction, probabilities):
     elif prediction == 2:
         return 'Although this article contains certain elements of truth. It is mostly false.'
     elif prediction == 3:
-        if (probabilities[2] + probabilities[3]) > 0.8:
-            return 'This article is true'
-        else:
-            return 'While mostly true, this article contains a few mischarecterizations and untruths'
+        return 'While mostly true, this article contains a few mischarecterizations'
     else:
         return 'This article is true.'
 
