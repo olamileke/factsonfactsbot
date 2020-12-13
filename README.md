@@ -4,7 +4,7 @@
 
 Telegram bot that parses news articles for false content and returns a fake news rating. Access the bot [here](https://t.me/factsonfactsbot "here"). 
 
-Alternatively, open up the Telegram app and search for *factsonfactsbot*. It has about a 88% accuracy. Ideally, I would have had access to 10k+ unique political articles to train the model but I could only access about 2025. 
+Alternatively, open up the Telegram app and search for *factsonfactsbot*. It has an accuracy of about 88%. Ideally, I would have had access to 10k+ unique political articles to train the model but I could only access about 2025. 
 
 I have to say thanks to this [article](https://towardsdatascience.com/full-pipeline-project-python-ai-for-detecting-fake-news-with-nlp-bbb1eec4936d "article"). It answered a lot of my questions and gave me a proper reference point/foundation to go about building this.
 
