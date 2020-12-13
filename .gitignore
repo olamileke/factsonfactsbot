@@ -4,3 +4,6 @@ venv
 
 # Pycache folder
 __pycache__
+
+# ec2 deploy
+ubuntu@3.15.210.161
