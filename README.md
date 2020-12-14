@@ -8,6 +8,8 @@ Alternatively, open up the Telegram app and search for *factsonfactsbot*. It has
 
 I have to say thanks to this [article](https://towardsdatascience.com/full-pipeline-project-python-ai-for-detecting-fake-news-with-nlp-bbb1eec4936d "article"). It answered a lot of my questions and gave me a proper reference point/foundation to go about building this.
 
+The model was trained with articles from nytimes, washingtonpost, politico and other politics based news sites. So, it performs optimally with similar articles. News articles from other information domains such as sports, entertainment and others will most likely not produce optimal results.
+
 To run this bot locally, you need to have python3+ on your system. Get it 
 [here](https://https://www.python.org/downloads/ "here"). Make sure to add python.exe to your operating system path variables to be able to run python scripts from the command line.
 
