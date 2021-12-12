@@ -5,6 +5,7 @@ from scraper import SoupStrainer
 from util import buildRow
 import config
 import re
+import os
 import pickle
 import os.path as path
 import logging
@@ -13,8 +14,11 @@ import logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
 
+# Setting the relevant configurations
+config.set()
+
 # Relevant variable declarations
-updater = Updater(token=config.bot_token, use_context=True)
+updater = Updater(token=os.environ.get("BOT_TOKEN"), use_context=True)
 dispatcher = updater.dispatcher
 url_filter = UrlFilter()
 svc_model = pickle.load(
