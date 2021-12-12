@@ -6,7 +6,7 @@ cryptography==2.8
 decorator==4.4.2
 future==0.18.2
 joblib==0.14.1
-nltk==3.4.5
+nltk==3.6.5
 numpy==1.18.2
 pandas==1.0.3
 pycparser==2.20
